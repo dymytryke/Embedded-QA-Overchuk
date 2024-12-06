@@ -16,7 +16,7 @@ class TestSuite:
         assert stats, "No valid stats parsed from iperf client output."
 
         # Filter the stats
-        filtered_stats = filter_stats(stats, transfer_threshold=2, bitrate_threshold=20)
+        filtered_stats = filter_stats(stats)
 
         # Ensure there are stats meeting the threshold
         assert filtered_stats, "No intervals meet the filtering criteria."
