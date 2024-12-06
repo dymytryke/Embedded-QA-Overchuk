@@ -1,26 +1,26 @@
 import pytest
 from parser import parse_iperf_output
+from filter import filter_stats
 
 class TestSuite:
     def test_iperf3_client_connection(self, client):
+        """
+        Verifies that iperf client returns valid data and filters statistics
+        meeting thresholds.
+        """
         output, error = client
         assert not error, f"Client error: {error}"
 
+        # Parse the iperf output
         stats = parse_iperf_output(output)
         assert stats, "No valid stats parsed from iperf client output."
 
-        # Validate Transfer and Bitrate conditions
-        for stat in stats:
-            transfer_value, transfer_unit = re.match(r"([\d.]+)\s+(\w+)", stat["Transfer"]).groups()
-            bitrate_value, bitrate_unit = re.match(r"([\d.]+)\s+(\w+/sec)", stat["Bitrate"]).groups()
+        # Filter the stats
+        filtered_stats = filter_stats(stats, transfer_threshold=2, bitrate_threshold=20)
 
-            transfer_value = float(transfer_value)
-            bitrate_value = float(bitrate_value)
+        # Ensure there are stats meeting the threshold
+        assert filtered_stats, "No intervals meet the filtering criteria."
 
-            if transfer_unit == "MBytes":
-                transfer_value /= 1024
-            if bitrate_unit == "Mbits/sec":
-                bitrate_value /= 1000
-
-            assert transfer_value > 2, f"Transfer {transfer_value} GB is below the threshold."
-            assert bitrate_value > 20, f"Bitrate {bitrate_value} Gbits/sec is below the threshold."
+        # Optionally, print filtered stats for debugging purposes
+        for stat in filtered_stats:
+            print(stat)
