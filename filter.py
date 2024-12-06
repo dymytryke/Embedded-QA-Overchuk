@@ -1,3 +1,5 @@
+import re;
+
 def filter_stats(stats):
     filtered_stats = []
     for stat in stats:
